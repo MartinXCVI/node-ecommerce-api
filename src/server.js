@@ -3,15 +3,14 @@ import express from 'express'
 import dotenv from 'dotenv'
 import bodyParser from 'body-parser'
 import morgan from 'morgan'
-import mongoose from 'mongoose'
 import connectDB from './config/dbConnection.js'
 import { apiUrl } from './utils/apiUrl.js'
 
 /* ROUTES IMPORTS */
 import productsRoutes from './routes/products.routes.js'
-
-/* MODELS IMPORTS */
-// import Product from './models/Product.model.js'
+import categoriesRoutes from './routes/categories.routes.js'
+import ordersRoutes from './routes/orders.routes.js'
+import usersRoutes from './routes/users.routes.js'
 
 // Making environment variables available throughout the app
 dotenv.config()
@@ -28,6 +27,9 @@ app.use(morgan('tiny')) // 'tiny' for a minimal output
 
 /* ROUTES */
 app.use(`${apiUrl}`, productsRoutes)
+app.use(`${apiUrl}`, categoriesRoutes)
+app.use(`${apiUrl}`, ordersRoutes)
+app.use(`${apiUrl}`, usersRoutes)
 
 /* SERVER LISTENER */
 app.listen(PORT, ()=> {
