@@ -5,6 +5,7 @@ import bodyParser from 'body-parser'
 import morgan from 'morgan'
 import connectDB from './config/dbConnection.js'
 import { apiUrl } from './utils/apiUrl.js'
+import cors from 'cors'
 
 /* ROUTES IMPORTS */
 import productsRoutes from './routes/products.routes.js'
@@ -18,6 +19,9 @@ dotenv.config()
 const app = express()
 // Port defined
 const PORT = process.env.PORT || 3000
+// Implementation of CORS
+app.use(cors())
+app.options('*', cors())
 
 /* MIDDLEWARES */
 // Parse incoming request bodies
