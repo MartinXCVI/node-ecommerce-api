@@ -1,5 +1,9 @@
+/* MODELS IMPORTS */
 import Product from "../models/Product.model.js"
 
+// @description: Get all products
+// @route: /products
+// @method: GET
 export const getProducts = async (req, res)=> {
   try {
     // Fetching all products
@@ -15,6 +19,9 @@ export const getProducts = async (req, res)=> {
   }
 }
 
+// @description: Create a product
+// @route: /products
+// @method: POST
 export const createProduct = async (req, res)=> {
   try {
     const product = new Product({
