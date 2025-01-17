@@ -93,11 +93,12 @@ export const createCategory = async (req, res)=> {
   }
   // Attempting to create the category
   try {
+    // Creating the category
     const category = new Category({ name, icon, color })
     const createdCategory = await category.save()
     res.status(201).json({
       success: true,
-      message: `Category ${createdCategory} successfully created`,
+      message: `Category ${createdCategory.name || createdCategory} successfully created`,
       category: createdCategory
     })
   } catch(error) {
@@ -128,6 +129,7 @@ export const updateCategory = async (req, res)=> {
   const { name, icon, color } = req.body
   // Attempting to update the category
   try {
+    // Updating the category
     const updatedCategory = await Category.findByIdAndUpdate(categoryId, {
       name: name,
       icon: icon,
@@ -171,7 +173,8 @@ export const deleteCategory = async (req, res)=> {
     })
   }
   // Attempting to delete the category
-  try { 
+  try {
+    // Deleting the category 
     const deletedCategory = await Category.findByIdAndDelete(categoryId) 
     // If not found or does not exist
     if(!deletedCategory) {
