@@ -4,6 +4,8 @@ import User from '../models/User.model.js'
 /* MODULES IMPORTS */
 import mongoose from 'mongoose'
 import bcrypt from 'bcrypt'
+import jwt from 'jsonwebtoken'
+
 
 // @description: Get all user
 // @route: /users
@@ -36,6 +38,31 @@ export const getUsers = async (req, res)=> {
     })
   }
 } // End of getUsers
+
+
+// @description: Get users count
+// @route: /users/get/count
+// @method: GET
+export const getUsersCount = async (req, res)=> {
+  // Attempting to get the users count
+  try {
+    // Counting the users number
+    const usersCount = await User.countDocuments()
+    // Returning the users
+    res.status(200).json({
+      success: true,
+      message: `Users count successfully retrieved`,
+      count: usersCount
+    })
+  } catch(error) {
+    console.error(`Error counting users: ${error.message || error}`)
+    res.status(500).json({
+      success: false,
+      message: "Internal server error",
+      error: error.message || error
+    })
+  }
+} // End of getProductsCount
 
 
 // @description: Get a user by id
@@ -144,4 +171,203 @@ export const createUser = async (req, res)=> {
       error: error.message || error,
     })
   }
-} // End of createCategory
+} // End of createUser
+
+
+// @description: Delete a user by id
+// @route: /users/:id
+// @method: DELETE
+export const deleteUser = async (req, res)=> {
+  // Getting the id
+  const userId = req.params.id
+  // Validating if the provided ID is a valid MongoDB ObjectId
+  if(!mongoose.Types.ObjectId.isValid(userId)) {
+    return res.status(400).json({
+      success: false,
+      message: "Invalid user ID",
+    })
+  }
+  // Attempting to delete the user
+  try {
+    const deletedUser = await User.findByIdAndDelete(userId)
+    // If not found or does not exist
+    if(!deletedUser) {
+      return res.status(404).json({
+        success: false,
+        message: `User with ID ${userId} not found`,
+      })
+    }
+    // Successfully deleted
+    res.status(200).json({
+      success: true,
+      message: `User '${deletedUser.name || deletedUser._id}' successfully deleted`,
+    })
+  } catch(error) {
+    console.error(`Error deleting user with ID '${productId}': ${error.message || error}`)
+    res.status(500).json({
+      error: error.message || error,
+      success: false
+    })
+  }
+} // End of deleteUser
+
+
+// @description: Login the user by email
+// @route: /users/login
+// @method: POST
+export const userLogin = async (req, res)=> {
+  // Getting the data from the body
+  const { email, password } = req.body
+  try {
+    // Searching the user by email
+    const user = await User.findOne({ email })
+    // If not found or does not exist
+    if(!user) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found or does not exist",
+      })
+    }
+    // Comparing the input password with the user hashed password in DB
+    const passwordsMatch = bcrypt.compareSync(password, user.password)
+    // If passwords do not match
+    if(!passwordsMatch) {
+      return res.status(401).json({
+        success: false,
+        message: "Unauthorized: Invalid credentials"
+      })
+    }
+    // Defining access token secret
+    const secret = process.env.ACCESS_TOKEN_SECRET
+    // Defining refresh token secret
+    const refreshSecret = process.env.REFRESH_TOKEN_SECRET
+    // Generating access token: data, access secret, expiration
+    const accessToken = jwt.sign(
+      { userId: user.id, isAdmin: user.isAdmin },
+      secret,
+      { expiresIn: '15m' } // 15 minutes lifespan for access token
+    )
+    // Generating refresh token: data, refresh secret, expiration
+    const refreshToken = jwt.sign(
+      { userId: user.id },
+      refreshSecret,
+      { expiresIn: '7d' } // 7 days lifespan for refresh token
+    )
+    // Setting access token as cookies
+    res.cookie("accessToken", accessToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "None",
+      maxAge: 15 * 60 * 1000, // 15 minutes
+    })
+    // Setting refresh token as cookies
+    res.cookie("refreshToken", refreshToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "None",
+      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+    })
+    // Successful login
+    res.status(200).json({
+      success: true,
+      message: `User ${user.name} successfully logged in` || 'User successfully logged in',
+    })
+  } catch(error) {
+    console.error(`Error logging in user: ${error.message || error}`)
+    res.status(500).json({
+      success: false,
+      message: "Internal server error",
+      error: error.message || error,
+    })
+  }
+} // End of userLogin
+
+// @description: Refreshing user token
+// @route: /users/refresh
+// @method: POST
+export const refreshUserToken = async (req, res)=> {
+  // Getting the refresh token from the cookie
+  const { refreshToken } = req.cookies
+  // Validating refresh token
+  if(!refreshToken) {
+    return res.status(401).json({
+      success: false,
+      message: "Refresh token not provided",
+    })
+  }
+  // Defining access token secret
+  const secret = process.env.ACCESS_TOKEN_SECRET
+  // Defining refresh token secret
+  const refreshSecret = process.env.REFRESH_TOKEN_SECRET
+  // Attempting to refresh the token
+  try {
+    // Verifying the refresh token
+    const payload = jwt.verify(refreshToken, refreshSecret)
+    // Fetching the user by id from the payload
+    const user = await findById(payload.userId)
+    // If user not found or does not exist
+    if(!user) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found or does not exist",
+      });
+    }
+    // Generating a new access token
+    const accessToken = jwt.sign(
+      { userId: user.id, isAdmin: user.isAdmin },
+      secret,
+      { expiresIn: "15m" } 
+    )
+    // Setting the new access token in a cookie
+    res.cookie("accessToken", accessToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "None",
+      maxAge: 15 * 60 * 1000, // 15 minutes
+    })
+    // Successful token refresh
+    res.status(200).json({
+      success: true,
+      message: "Access token successfully refreshed"
+    })
+  } catch(error) {
+    console.error(`Error refreshing token: ${error.message || error}`)
+    res.status(403).json({
+      success: false,
+      message: "Invalid or expired refresh token",
+      error: error.message || error
+    })
+  }
+} // End of refreshUserToken
+
+
+// @description: Logging out the user
+// @route: /users/logout
+// @method: POST
+export const userLogout = (req, res)=> {
+  // Attempting to logout
+  try {
+    // Checking if the user is already logged out
+    if(!req.cookies.accessToken && !req.cookies.refreshToken) {
+      return res.status(400).json({
+        success: false,
+        message: "User is already logged out"
+      })
+    }
+    // Clearing the cookies
+    res.clearCookie("accessToken")
+    res.clearCookie("refreshToken")
+    // Successful logout
+    res.status(200).json({
+      success: true,
+      message: "User successfully logged out. All cookies were cleared!",
+    })
+  } catch(error) {
+    console.error(`Error during logout: ${error.message || error}`)
+    res.status(500).json({
+      success: false,
+      message: "Internal server error during logout",
+      error: error.message || error
+    })
+  }
+} // End of userLogout

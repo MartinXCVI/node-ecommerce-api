@@ -10,9 +10,10 @@ import Product from "../models/Product.model.js"
 // @method: GET
 export const getProducts = async (req, res)=> {
   // Defaulting to 1st page and 10 products per page
-  const { page = 1, limit = 10 } = req.query;
+  const { page = 1, limit = 10 } = req.query
+  // Attempting to fetch all products
   try {
-    // Fetching all products
+    // Fetching and storing products in a list
     // The populate() methods let's you reference documents in other collections
     const productsList = await Product.find().populate('category')
       .skip((page - 1) * limit) // Skipping products based on page
@@ -41,7 +42,7 @@ export const getProducts = async (req, res)=> {
     console.error(`Error fetching products: ${error.message || error}`)
     res.status(500).json({
       success: false,
-      message: "Internal server error",
+      message: "Internal server error while attempting to fetch products",
       error: error.message || error,
     })
   }
@@ -54,10 +55,11 @@ export const getProducts = async (req, res)=> {
 export const getProductsByCategory = async (req, res)=> {
   // Defaulting to 1st page and 10 products per page
   const { page = 1, limit = 10 } = req.query
-  // Getting the id
+  // Getting the id from the request parameters
   const categoryId = req.params.id
+  // Attempting to get the product by category
   try {
-    // Validating category ID
+    // Validating if the category ID is a valid MongoDB ObjectId
     if(!mongoose.Types.ObjectId.isValid(categoryId)) {
       return res.status(400).json({
         success: false,
@@ -94,7 +96,7 @@ export const getProductsByCategory = async (req, res)=> {
     console.error(`Error fetching products by category: ${error.message || error}`)
     res.status(500).json({
       success: false,
-      message: "Internal server error",
+      message: "Internal server error while attempting to retrieve products by category",
       error: error.message || error,
     })
   }
@@ -105,7 +107,7 @@ export const getProductsByCategory = async (req, res)=> {
 // @route: /products/:id
 // @method: GET
 export const getProduct = async (req, res)=> {
-  // Getting the id
+  // Getting the id from the request parameters
   const productId = req.params.id
   // Validating if the provided ID is a valid MongoDB ObjectId
   if(!mongoose.Types.ObjectId.isValid(productId)) {
@@ -123,10 +125,10 @@ export const getProduct = async (req, res)=> {
     if(!product) {
       return res.status(404).json({
         success: false,
-        message: `Product with ID ${productId} was not found`
+        message: `Product '${product.name}' with ID ${productId} was not found`
       })
     }
-    // Returning the category
+    // Returning the product
     res.status(200).json({
       success: true,
       message: `Product ${product.name || product._id} successfully retrieved`,
@@ -136,11 +138,12 @@ export const getProduct = async (req, res)=> {
     console.error(`Error retrieving product with ID '${productId}': ${error.message || error}`)
     res.status(500).json({
       success: false,
-      message: "Internal server error",
+      message: "Internal server error while attempting to retrieve product by ID",
       error: error.message || error
     })
   }
 } // End of getProduct
+
 
 // @description: Get products count
 // @route: /products/get/count
@@ -150,7 +153,7 @@ export const getProductsCount = async (req, res)=> {
   try {
     // Counting the products number
     const productCount = await Product.countDocuments()
-    // Returning the category
+    // Returning the products count
     res.status(200).json({
       success: true,
       message: `Products count successfully retrieved`,
@@ -160,7 +163,7 @@ export const getProductsCount = async (req, res)=> {
     console.error(`Error counting products: ${error.message || error}`)
     res.status(500).json({
       success: false,
-      message: "Internal server error",
+      message: "Internal server error while attempting to retrieve the products count",
       error: error.message || error
     })
   }
@@ -171,8 +174,8 @@ export const getProductsCount = async (req, res)=> {
 // @route: /products/get/featured
 // @method: GET
 export const getFeaturedProducts = async (req, res)=> {
-  // Getting the count
-  const count = req.params.count ? req.params.count : 0
+  // Getting the count from the request parameters
+  const count = req.params.count ? req.params.count : 0 // Defaults to 0 if no count is set
   // Attempting to get the featured products
   try {
     // Fetching the featured products
@@ -196,7 +199,7 @@ export const getFeaturedProducts = async (req, res)=> {
     console.error(`Error retrieving featured products: ${error.message || error}`)
     res.status(500).json({
       success: false,
-      message: "Internal server error",
+      message: "Internal server error while attempting to retrieve featured products",
       error: error.message || error
     })
   }
@@ -228,7 +231,7 @@ export const createProduct = async (req, res)=> {
       message: "The following fields are required: name, description, category, countInStock"
     })
    }
-   // Attempting to create the product
+  // Attempting to create the product
   try {
     // Validating if the category exists
     const categoryExists = await Category.findById(category)
@@ -253,6 +256,7 @@ export const createProduct = async (req, res)=> {
       isFeatured
     })
     const createdProduct = await product.save()
+    // Successful creation
     res.status(201).json({
       success: true,
       message: `Product ${createdProduct.name || createdProduct._id} successfully created`,
@@ -262,7 +266,7 @@ export const createProduct = async (req, res)=> {
     console.error(`Error creating product: ${error.message || error}`)
     res.status(500).json({
       success: false,
-      message: "Internal server error",
+      message: "Internal server error while attempting to create a product",
       error: error.message || error,
     })
   }
@@ -273,7 +277,7 @@ export const createProduct = async (req, res)=> {
 // @route: /products/:id
 // @method: PUT
 export const updateProduct = async (req, res)=> {
-  // Getting the id
+  // Getting the id from the request parameters
   const productId = req.params.id
   // Validating if the provided ID is a valid MongoDB ObjectId
   if(!mongoose.Types.ObjectId.isValid(productId)) {
@@ -327,24 +331,24 @@ export const updateProduct = async (req, res)=> {
       numReviews: numReviews,
       isFeatured: isFeatured,
     }, { new: true }) // Third param for returning the updated item
-    // If category not found
-    if (!updatedProduct) {
+    // If product not found
+    if(!updatedProduct) {
       return res.status(404).json({
         success: false,
-        message: `Category with ID ${productId} not found`,
+        message: `Product '${updateProduct.name}' with ID ${productId} not found` || 'Product not found',
       })
     }
     // Returning success response with updated product
     res.status(201).json({
       success: true,
-      message: `Category ${updatedProduct.name || updatedProduct._id} successfully updated`,
+      message: `Product ${updatedProduct.name || updatedProduct._id} successfully updated`,
       category: updatedProduct
     })
   } catch(error) {
     console.error(`Error updating product with ID '${productId}': ${error.message || error}`)
     res.status(500).json({
       success: false,
-      message: "Internal server error",
+      message: "Internal server error while attempting to update product",
       error: error.message || error,
     })
   }
@@ -355,7 +359,7 @@ export const updateProduct = async (req, res)=> {
 // @route: /products/:id
 // @method: DELETE
 export const deleteProduct = async (req, res)=> {
-  // Getting the id
+  // Getting the id from the request parameters
   const productId = req.params.id
   // Validating if the provided ID is a valid MongoDB ObjectId
   if(!mongoose.Types.ObjectId.isValid(productId)) {
@@ -365,13 +369,14 @@ export const deleteProduct = async (req, res)=> {
     })
   }
   // Attempting to delete the product
-  try { 
+  try {
+    // Deleting the product
     const deletedProduct = await Product.findByIdAndDelete(productId)
     // If not found or does not exist
     if(!deletedProduct) {
       return res.status(404).json({
         success: false,
-        message: `Product with ID ${productId} not found`,
+        message: `Product '${deletedProduct.name}' with ID ${productId} not found` || 'Product not found',
       })
     }
     // Successfully deleted
@@ -382,8 +387,9 @@ export const deleteProduct = async (req, res)=> {
   } catch(error) {
     console.error(`Error deleting product with ID '${productId}': ${error.message || error}`)
     res.status(500).json({
+      success: false,
+      message: "Internal server error while attempting to delete a product",
       error: error.message || error,
-      success: false
     })
   }
 } // End of deleteProduct

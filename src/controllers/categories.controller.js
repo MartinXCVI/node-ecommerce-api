@@ -9,8 +9,9 @@ import Category from '../models/Category.model.js'
 // @route: /categories
 // @method: GET
 export const getCategories = async (req, res)=> {
+  // Attempting to fetch all categories
   try {
-    // Fetching all categories
+    // Fetching and storing categories in a list
     const categoriesList = await Category.find()
     // Returning an empty array with a message if no categories exists
     if(categoriesList.length === 0) {
@@ -30,7 +31,7 @@ export const getCategories = async (req, res)=> {
     console.error(`Error fetching categories: ${error.message || error}`)
     res.status(500).json({
       success: false,
-      message: "Internal server error",
+      message: "Internal server error during the fetching of categories",
       error: error.message || error,
     })
   }
@@ -41,7 +42,7 @@ export const getCategories = async (req, res)=> {
 // @route: /categories/:id
 // @method: GET
 export const getCategory = async (req, res)=> {
-  // Getting the id
+  // Getting the id from the request parameters
   const categoryId = req.params.id
   // Validating if the provided ID is a valid MongoDB ObjectId
   if(!mongoose.Types.ObjectId.isValid(categoryId)) {
@@ -71,7 +72,7 @@ export const getCategory = async (req, res)=> {
     console.error(`Error retrieving category with ID '${categoryId}': ${error.message || error}`)
     res.status(500).json({
       success: false,
-      message: "Internal server error",
+      message: "Internal server error while attempting to retrieve category by ID",
       error: error.message || error,
     })
   }
@@ -96,6 +97,7 @@ export const createCategory = async (req, res)=> {
     // Creating the category
     const category = new Category({ name, icon, color })
     const createdCategory = await category.save()
+    // Successful creation
     res.status(201).json({
       success: true,
       message: `Category ${createdCategory.name || createdCategory} successfully created`,
@@ -105,7 +107,7 @@ export const createCategory = async (req, res)=> {
     console.error(`Error creating category: ${error.message || error}`)
     res.status(500).json({
       success: false,
-      message: "Internal server error",
+      message: "Internal server error while attempting to create category",
       error: error.message || error,
     })
   }
@@ -116,7 +118,7 @@ export const createCategory = async (req, res)=> {
 // @route: /categories/:id
 // @method: PUT
 export const updateCategory = async (req, res)=> {
-  // Getting the id
+  // Getting the id from the request parameters
   const categoryId = req.params.id
   // Validating if the provided ID is a valid MongoDB ObjectId
   if(!mongoose.Types.ObjectId.isValid(categoryId)) {
@@ -163,7 +165,7 @@ export const updateCategory = async (req, res)=> {
 // @route: /categories/:id
 // @method: DELETE
 export const deleteCategory = async (req, res)=> {
-  // Getting the id
+  // Getting the id from the request parameters
   const categoryId = req.params.id
   // Validating if the provided ID is a valid MongoDB ObjectId
   if(!mongoose.Types.ObjectId.isValid(categoryId)) {
@@ -191,8 +193,9 @@ export const deleteCategory = async (req, res)=> {
   } catch(error) {
     console.error(`Error deleting category with ID '${categoryId}': ${error.message || error}`)
     res.status(500).json({
+      success: false,
+      message: "Internal server error while attempting to delete category",
       error: error.message || error,
-      success: false
     })
   }
 } // End of deleteCategory

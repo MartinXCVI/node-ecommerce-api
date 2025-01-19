@@ -16,12 +16,15 @@ router.get('/products/by-category/:id', getProductsByCategory);
 router.get('/products/get/featured/:count', getFeaturedProducts)
 
 /* POST routes */
+// Create a new product
 router.post('/products', createProduct)
 
 /* PUT routes */
+// Updating a product by id
 router.put('/products/:id', updateProduct)
 
 /* DELETE routes */
+// Deleting a product by id
 router.delete('/products/:id', deleteProduct)
 
 export default router
