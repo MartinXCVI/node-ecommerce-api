@@ -22,14 +22,14 @@ export const getCategories = async (req, res)=> {
       })
     }
     // Returning the categories
-    res.status(200).json({
+    return res.status(200).json({
       success: true,
       message: "Categories successfully retrieved",
       categories: categoriesList
     })
   } catch(error) {
     console.error(`Error fetching categories: ${error.message || error}`)
-    res.status(500).json({
+    return res.status(500).json({
       success: false,
       message: "Internal server error during the fetching of categories",
       error: error.message || error,
@@ -63,14 +63,14 @@ export const getCategory = async (req, res)=> {
       })
     }
     // Returning the category
-    res.status(200).json({
+    return res.status(200).json({
       success: true,
       message: `Category '${category.name || categoryId}' successfully retrieved`,
       category: category
     })
   } catch(error) {
     console.error(`Error retrieving category with ID '${categoryId}': ${error.message || error}`)
-    res.status(500).json({
+    return res.status(500).json({
       success: false,
       message: "Internal server error while attempting to retrieve category by ID",
       error: error.message || error,
@@ -98,14 +98,14 @@ export const createCategory = async (req, res)=> {
     const category = new Category({ name, icon, color })
     const createdCategory = await category.save()
     // Successful creation
-    res.status(201).json({
+    return res.status(201).json({
       success: true,
       message: `Category ${createdCategory.name || createdCategory} successfully created`,
       category: createdCategory
     })
   } catch(error) {
     console.error(`Error creating category: ${error.message || error}`)
-    res.status(500).json({
+    return res.status(500).json({
       success: false,
       message: "Internal server error while attempting to create category",
       error: error.message || error,
@@ -138,21 +138,21 @@ export const updateCategory = async (req, res)=> {
       color: color,
     }, { new: true }) // Third param for returning the updated item
     // If category not found
-    if (!updatedCategory) {
+    if(!updatedCategory) {
       return res.status(404).json({
         success: false,
         message: `Category with ID ${categoryId} not found`,
       })
     }
     // Returning success response with updated category
-    res.status(201).json({
+    return res.status(201).json({
       success: true,
       message: `Category ${updatedCategory.name || updatedCategory._id} successfully updated`,
       category: updatedCategory
     })
   } catch(error) {
     console.error(`Error updating category with ID '${categoryId}': ${error.message || error}`)
-    res.status(500).json({
+    return res.status(500).json({
       success: false,
       message: "Internal server error",
       error: error.message || error,
@@ -186,13 +186,13 @@ export const deleteCategory = async (req, res)=> {
       })
     }
     // Successfully deleted
-    res.status(200).json({
+    return res.status(200).json({
       success: true,
       message: `Category '${deletedCategory.name || deletedCategory._id}' successfully deleted`,
     })
   } catch(error) {
     console.error(`Error deleting category with ID '${categoryId}': ${error.message || error}`)
-    res.status(500).json({
+    return res.status(500).json({
       success: false,
       message: "Internal server error while attempting to delete category",
       error: error.message || error,

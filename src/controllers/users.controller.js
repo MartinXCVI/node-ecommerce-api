@@ -24,14 +24,14 @@ export const getUsers = async (req, res)=> {
       })
     }
     // Returning the users
-    res.status(200).json({
+    return res.status(200).json({
       success: true,
       message: "Users successfully retrieved",
       users: usersList
     })
   } catch(error) {
     console.error(`Error fetching users: ${error.message || error}`)
-    res.status(500).json({
+    return res.status(500).json({
       success: false,
       message: "Internal server error",
       error: error.message || error,
@@ -48,15 +48,15 @@ export const getUsersCount = async (req, res)=> {
   try {
     // Counting the users number
     const usersCount = await User.countDocuments()
-    // Returning the users
-    res.status(200).json({
+    // Returning the users count
+    return res.status(200).json({
       success: true,
       message: `Users count successfully retrieved`,
       count: usersCount
     })
   } catch(error) {
     console.error(`Error counting users: ${error.message || error}`)
-    res.status(500).json({
+    return res.status(500).json({
       success: false,
       message: "Internal server error",
       error: error.message || error
@@ -90,14 +90,14 @@ export const getUser = async (req, res)=> {
       })
     }
     // Returning the user
-    res.status(200).json({
+    return res.status(200).json({
       success: true,
       message: `User '${user.name || userId}' successfully retrieved`,
       user: user
     })
   } catch(error) {
     console.error(`Error retrieving user with ID '${userId}': ${error.message || error}`)
-    res.status(500).json({
+    return res.status(500).json({
       success: false,
       message: "Internal server error",
       error: error.message || error,
@@ -158,14 +158,15 @@ export const createUser = async (req, res)=> {
       country,
     })
     const createdUser = await user.save()
-    res.status(201).json({
+    // Successful user creation
+    return res.status(201).json({
       success: true,
       message: `User ${createdUser.name || createdUser} successfully created`,
       user: createdUser
     })
   } catch(error) {
     console.error(`Error creating user: ${error.message || error}`)
-    res.status(500).json({
+    return res.status(500).json({
       success: false,
       message: "Internal server error",
       error: error.message || error,
@@ -198,13 +199,13 @@ export const deleteUser = async (req, res)=> {
       })
     }
     // Successfully deleted
-    res.status(200).json({
+    return res.status(200).json({
       success: true,
       message: `User '${deletedUser.name || deletedUser._id}' successfully deleted`,
     })
   } catch(error) {
     console.error(`Error deleting user with ID '${productId}': ${error.message || error}`)
-    res.status(500).json({
+    return res.status(500).json({
       error: error.message || error,
       success: false
     })
@@ -268,19 +269,20 @@ export const userLogin = async (req, res)=> {
       maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
     })
     // Successful login
-    res.status(200).json({
+    return res.status(200).json({
       success: true,
       message: `User ${user.name} successfully logged in` || 'User successfully logged in',
     })
   } catch(error) {
     console.error(`Error logging in user: ${error.message || error}`)
-    res.status(500).json({
+    return res.status(500).json({
       success: false,
       message: "Internal server error",
       error: error.message || error,
     })
   }
 } // End of userLogin
+
 
 // @description: Refreshing user token
 // @route: /users/refresh
@@ -326,13 +328,13 @@ export const refreshUserToken = async (req, res)=> {
       maxAge: 15 * 60 * 1000, // 15 minutes
     })
     // Successful token refresh
-    res.status(200).json({
+    return res.status(200).json({
       success: true,
       message: "Access token successfully refreshed"
     })
   } catch(error) {
     console.error(`Error refreshing token: ${error.message || error}`)
-    res.status(403).json({
+    return res.status(403).json({
       success: false,
       message: "Invalid or expired refresh token",
       error: error.message || error
@@ -358,13 +360,13 @@ export const userLogout = (req, res)=> {
     res.clearCookie("accessToken")
     res.clearCookie("refreshToken")
     // Successful logout
-    res.status(200).json({
+    return res.status(200).json({
       success: true,
       message: "User successfully logged out. All cookies were cleared!",
     })
   } catch(error) {
     console.error(`Error during logout: ${error.message || error}`)
-    res.status(500).json({
+    return res.status(500).json({
       success: false,
       message: "Internal server error during logout",
       error: error.message || error

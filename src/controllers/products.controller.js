@@ -30,7 +30,7 @@ export const getProducts = async (req, res)=> {
       })
     }
     // Returning the products
-    res.status(200).json({
+    return res.status(200).json({
       success: true,
       message: "Products successfully retrieved",
       products: productsList,
@@ -40,7 +40,7 @@ export const getProducts = async (req, res)=> {
     })
   } catch(error) {
     console.error(`Error fetching products: ${error.message || error}`)
-    res.status(500).json({
+    return res.status(500).json({
       success: false,
       message: "Internal server error while attempting to fetch products",
       error: error.message || error,
@@ -83,8 +83,8 @@ export const getProductsByCategory = async (req, res)=> {
         total: totalProducts
       })
     }
-    // Returning the products
-    res.status(200).json({
+    // Returning the products by category
+    return res.status(200).json({
       success: true,
       message: "Products successfully retrieved by category",
       products: productsList,
@@ -94,7 +94,7 @@ export const getProductsByCategory = async (req, res)=> {
     })
   } catch(error) {
     console.error(`Error fetching products by category: ${error.message || error}`)
-    res.status(500).json({
+    return res.status(500).json({
       success: false,
       message: "Internal server error while attempting to retrieve products by category",
       error: error.message || error,
@@ -128,15 +128,15 @@ export const getProduct = async (req, res)=> {
         message: `Product '${product.name}' with ID ${productId} was not found`
       })
     }
-    // Returning the product
-    res.status(200).json({
+    // Returning the product by id
+    return res.status(200).json({
       success: true,
       message: `Product ${product.name || product._id} successfully retrieved`,
       product: product
     })
   } catch(error) {
     console.error(`Error retrieving product with ID '${productId}': ${error.message || error}`)
-    res.status(500).json({
+    return res.status(500).json({
       success: false,
       message: "Internal server error while attempting to retrieve product by ID",
       error: error.message || error
@@ -154,14 +154,14 @@ export const getProductsCount = async (req, res)=> {
     // Counting the products number
     const productCount = await Product.countDocuments()
     // Returning the products count
-    res.status(200).json({
+    return res.status(200).json({
       success: true,
       message: `Products count successfully retrieved`,
       count: productCount
     })
   } catch(error) {
     console.error(`Error counting products: ${error.message || error}`)
-    res.status(500).json({
+    return res.status(500).json({
       success: false,
       message: "Internal server error while attempting to retrieve the products count",
       error: error.message || error
@@ -190,14 +190,14 @@ export const getFeaturedProducts = async (req, res)=> {
       })
     }
     // Returning the featured products
-    res.status(200).json({
+    return res.status(200).json({
       success: true,
       message: `Featured products successfully retrieved`,
       featuredProducts: featuredProducts
     })
   } catch(error) {
     console.error(`Error retrieving featured products: ${error.message || error}`)
-    res.status(500).json({
+    return res.status(500).json({
       success: false,
       message: "Internal server error while attempting to retrieve featured products",
       error: error.message || error
@@ -256,15 +256,15 @@ export const createProduct = async (req, res)=> {
       isFeatured
     })
     const createdProduct = await product.save()
-    // Successful creation
-    res.status(201).json({
+    // Successful product creation
+    return res.status(201).json({
       success: true,
       message: `Product ${createdProduct.name || createdProduct._id} successfully created`,
       product: createdProduct
     })
   } catch(error) {
     console.error(`Error creating product: ${error.message || error}`)
-    res.status(500).json({
+    return res.status(500).json({
       success: false,
       message: "Internal server error while attempting to create a product",
       error: error.message || error,
@@ -339,14 +339,14 @@ export const updateProduct = async (req, res)=> {
       })
     }
     // Returning success response with updated product
-    res.status(201).json({
+    return res.status(201).json({
       success: true,
       message: `Product ${updatedProduct.name || updatedProduct._id} successfully updated`,
       category: updatedProduct
     })
   } catch(error) {
     console.error(`Error updating product with ID '${productId}': ${error.message || error}`)
-    res.status(500).json({
+    return res.status(500).json({
       success: false,
       message: "Internal server error while attempting to update product",
       error: error.message || error,
@@ -380,13 +380,13 @@ export const deleteProduct = async (req, res)=> {
       })
     }
     // Successfully deleted
-    res.status(200).json({
+    return res.status(200).json({
       success: true,
       message: `Product '${deletedProduct.name || deletedProduct._id}' successfully deleted`,
     })
   } catch(error) {
     console.error(`Error deleting product with ID '${productId}': ${error.message || error}`)
-    res.status(500).json({
+    return res.status(500).json({
       success: false,
       message: "Internal server error while attempting to delete a product",
       error: error.message || error,
