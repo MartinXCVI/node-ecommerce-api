@@ -1,5 +1,11 @@
 import express from 'express'
-import { getProducts, getProduct, getProductsCount, getFeaturedProducts, getProductsByCategory, createProduct, updateProduct, deleteProduct } from '../controllers/products.controller.js'
+// Import of products controllers
+import { getProducts, getProduct, getProductsCount,
+  getFeaturedProducts, getProductsByCategory, createProduct,
+  updateProduct, deleteProduct, updateProductGallery 
+} from '../controllers/products.controller.js'
+// Import of helper function to upload image(s)
+import { uploadImage } from '../helpers/uploadImage.js'
 
 const router = express.Router()
 
@@ -17,11 +23,13 @@ router.get('/products/get/featured/:count', getFeaturedProducts)
 
 /* POST routes */
 // Create a new product
-router.post('/products', createProduct)
+router.post('/products', uploadImage.single('image'), createProduct)
 
 /* PUT routes */
 // Updating a product by id
 router.put('/products/:id', updateProduct)
+// Updating product gallery by id
+router.put('/products/gallery-images/:id', uploadImage.array('images', 10), updateProductGallery)
 
 /* DELETE routes */
 // Deleting a product by id

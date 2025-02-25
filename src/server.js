@@ -38,6 +38,8 @@ app.use(cookieParser())
 app.use(morgan('tiny')) // 'tiny' for a minimal output
 // Protecting the API
 app.use(authJwt())
+// For serving static files
+app.use("/public/uploads", express.static("public/uploads"));
 
 /* ROUTES */
 app.use(`${apiUrl}`, productsRoutes)

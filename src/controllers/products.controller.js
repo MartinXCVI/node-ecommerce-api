@@ -5,6 +5,9 @@ import mongoose from 'mongoose'
 import Category from "../models/Category.model.js"
 import Product from "../models/Product.model.js"
 
+/*---------------------*/
+/*-- GET Controllers --*/
+
 // @description: Get all products
 // @route: /products
 // @method: GET
@@ -206,6 +209,10 @@ export const getFeaturedProducts = async (req, res)=> {
 } // End of getFeaturedProducts
 
 
+/*----------------------*/
+/*-- POST Controllers --*/
+
+
 // @description: Create a product
 // @route: /products
 // @method: POST
@@ -241,12 +248,24 @@ export const createProduct = async (req, res)=> {
         message: "Invalid category"
       })
     }
+    // Validating image file existence
+    const file = req.file
+    if(!file) {
+      return res.status(400).json({
+        success: false,
+        message: "No image in the request"
+      })
+    }
+    /* Getting the image name from the request and
+    defining the path for the uploaded image(s) */
+    const imageName = req.file.filename
+    const uploadsPath = `${req.protocol}://${req.get('host')}/public/uploads`
     // Creating the product
     const product = new Product({
       name,
       description,
       richDescription,
-      image,
+      image: `${uploadsPath}/${imageName}`,
       brand,
       price,
       category,
@@ -353,6 +372,76 @@ export const updateProduct = async (req, res)=> {
     })
   }
 } // End of updateProduct
+
+
+/*----------------------*/
+/*-- PUT Controllers --*/
+
+
+// @description: Update product gallery
+// @route: /products/:id
+// @method: PUT
+export const updateProductGallery = async (req, res)=> {
+  // Getting the id from the request parameters
+  const productId = req.params.id
+  // Validating if the provided ID is a valid MongoDB ObjectId
+  if(!mongoose.Types.ObjectId.isValid(productId)) {
+    return res.status(400).json({
+      success: false,
+      message: "Invalid product ID",
+    })
+  }
+  // Getting the images from the request
+  const images = req.files
+  let imagesPaths = [] // Initializing array of images paths
+  // Defining uploads path
+  const uploadsPath = `${req.protocol}://${req.get('host')}/public/uploads`
+  // Validating images files existence
+  if(!images || images.length === 0) {
+    return res.status(400).json({
+      success: false,
+      message: "No images in the request"
+    })
+  }
+  // Looping over the images
+  images.map(image => {
+    imagesPaths.push(`${uploadsPath}/${image.filename}`)
+  })
+  // Attempting to update product gallery
+  try {
+    // Updating the product gallery
+    const product = await Product.findByIdAndUpdate(productId, {
+      images: imagesPaths
+    }, { new: true }) // Third param for returning the updated items
+    // If product not found
+    if(!product) {
+      return res.status(404).json({
+        success: false,
+        message: `Product with ID ${productId} not found`,
+      })
+    }
+    // Returning success response with updated product gallery
+    return res.status(200).json({
+      success: true,
+      message: `Gallery of product ${product.name || productId} successfully updated`,
+      product
+    })
+  } catch(error) {
+    console.error(
+      `Error updating gallery of product with ID '${productId}': ${error.message || error}`,
+      { uploadedFiles: images.map(img => img.filename) }
+    )
+    return res.status(500).json({
+      success: false,
+      message: "Internal server error while attempting to update product gallery",
+      error: error.message || error,
+    })
+  }
+} // End of updateProductGallery
+
+
+/*------------------------*/
+/*-- DELETE Controllers --*/
 
 
 // @description: Delete a product by id
