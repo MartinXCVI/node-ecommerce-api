@@ -37,7 +37,7 @@ app.use(cookieParser())
 // Display of log requests
 app.use(morgan('tiny')) // 'tiny' for a minimal output
 // Protecting the API
-app.use(authJwt())
+app.use('/api/v1', authJwt(true))
 // For serving static files
 app.use("/public/uploads", express.static("public/uploads"));
 

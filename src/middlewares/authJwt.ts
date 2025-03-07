@@ -17,7 +17,18 @@ export function authJwt(isAdminCheck = false) {
     secret, // Access token secret
     algorithms: ['HS256'], // Algorithm used for generating the token
     getToken: getTokenFromCookie, // Retrieving token from the cookie
-    isRevoked: isAdminCheck ? isRevoked : undefined // Conditionally revoking access for non-admin users
+    // isRevoked: isAdminCheck ? isRevoked : undefined // Conditionally revoking access for non-admin users
+    isRevoked: (req, token) => {
+      // Ensuring token and payload exist before accessing properties
+      if(!token || typeof token.payload !== "object") {
+        return true // Revoke access if token is missing or malformed
+      }
+      // Blocking if user is not an admin
+      if(isAdminCheck) {
+        return !token.payload?.isAdmin
+      }
+      return false
+    }
   }).unless({ // Excluding APIs from being authenticated
     path: [...UNPROTECTED_PATHS],
   })

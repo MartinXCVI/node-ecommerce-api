@@ -258,7 +258,7 @@ export const userLogin = async (req: Request, res: Response): Promise<any> => {
     )
     // Generating refresh token: data, refresh secret, expiration
     const refreshToken = jwt.sign(
-      { userId: user.id },
+      { userId: user.id, isAdmin: user.isAdmin },
       refreshSecret,
       { expiresIn: '7d' } // 7 days lifespan for refresh token
     )
@@ -330,17 +330,29 @@ export const refreshUserToken = async (req: Request, res: Response): Promise<any
       });
     }
     // Generating a new access token
-    const accessToken = jwt.sign(
+    const newAccessToken = jwt.sign(
       { userId: user.id, isAdmin: user.isAdmin },
       secret,
       { expiresIn: "15m" } 
     )
+    // Generating a new refresh token
+    const newRefreshToken = jwt.sign(
+      { userId: user.id, isAdmin: user.isAdmin },
+      refreshSecret,
+      { expiresIn: "7d" }
+    )
     // Setting the new access token in a cookie
-    res.cookie("accessToken", accessToken, {
+    res.cookie("accessToken", newAccessToken, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
       sameSite: "none",
       maxAge: 15 * 60 * 1000, // 15 minutes
+    })
+    res.cookie("refreshToken", newRefreshToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "none",
+      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
     })
     // Successful token refresh
     return res.status(200).json({
@@ -372,8 +384,16 @@ export const userLogout: (req: Request, res: Response, next: NextFunction) => vo
       })
     }
     // Clearing the cookies
-    res.clearCookie("accessToken")
-    res.clearCookie("refreshToken")
+    res.clearCookie("accessToken", {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "none",
+    })
+    res.clearCookie("refreshToken", {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "none",
+    })
     // Successful logout
     return res.status(200).json({
       success: true,
