@@ -1,5 +1,5 @@
 import { Request } from "express"
 
-export interface MulterRequest extends Request {
+export interface IMulterRequest extends Request {
   file?: Express.Multer.File
 }

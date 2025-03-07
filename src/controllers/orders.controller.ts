@@ -3,7 +3,7 @@ import mongoose from 'mongoose'
 import { Request, Response } from 'express'
 
 /* INTERFACES IMPORTS */
-import { OrderItemRequest } from '../interfaces/OrderItemRequest.js'
+import { IOrderItemRequest } from '../interfaces/IOrderItemRequest.js'
 
 /* MODELS IMPORTS */
 import Order from '../models/Order.model.js'
@@ -214,7 +214,7 @@ export const getOrdersCount = async (req: Request, res: Response): Promise<any> 
 // @method: POST
 export const createOrder = async (req: Request, res: Response): Promise<any> => {
   // Getting order items id from order items in DB
-  const orderItemsIds = Promise.all(req.body.orderItems.map(async (orderItem: OrderItemRequest) => {
+  const orderItemsIds = Promise.all(req.body.orderItems.map(async (orderItem: IOrderItemRequest) => {
     // Creating a new order item
     let newOrderItem = new OrderItem({
       quantity: orderItem.quantity,

@@ -3,8 +3,8 @@ import mongoose from 'mongoose'
 import { Request, Response } from 'express'
 
 /* INTERFACES IMPORTS */
-import { MulterRequest } from '../interfaces/MulterRequest.js'
-import { MulterFilesRequest } from '../interfaces/MulterFilesRequest.js'
+import { IMulterRequest } from '../interfaces/IMulterRequest.js'
+import { IMulterFilesRequest } from '../interfaces/IMulterFilesRequest.js'
 
 /* MODELS IMPORTS */
 import Category from "../models/Category.model.js"
@@ -237,7 +237,7 @@ export const getFeaturedProducts = async (req: Request, res: Response): Promise<
 // @description: Create a product
 // @route: /products
 // @method: POST
-export const createProduct = async (req: MulterRequest, res: Response): Promise<any> => {
+export const createProduct = async (req: IMulterRequest, res: Response): Promise<any> => {
   // Getting the data from the body
   const {
     name,

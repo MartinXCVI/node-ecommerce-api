@@ -1,7 +1,7 @@
 /* MODULES IMPORTS */
 import { Request } from 'express'
 import jwt from "jsonwebtoken"
-import { JwtPayload } from '../interfaces/JwtPayload'
+import { IJwtPayload } from '../interfaces/IJwtPayload'
 import { expressjwt } from "express-jwt"
 import { UNPROTECTED_PATHS } from '../config/unprotectedPaths.js'
 
@@ -35,7 +35,7 @@ export function authJwt(isAdminCheck = false) {
 }
 
 // Is admin check function
-async function isAdminCheck(payload: JwtPayload): Promise<boolean> {
+async function isAdminCheck(payload: IJwtPayload): Promise<boolean> {
   // Checking if the token payload exists and if the user is an admin
   if(!payload || !payload.isAdmin) {
     console.log(`isAdminCheck: User is not an admin`)
@@ -53,7 +53,7 @@ async function isRevoked(req: Request, token: any | undefined): Promise<boolean>
     console.log("Access revoked: No token provided")
   }
   try {
-    const payload = jwt.decode(token as string) as JwtPayload | null
+    const payload = jwt.decode(token as string) as IJwtPayload | null
     // If no payload
     if(!payload) {
       console.log("Access revoked: Token is invalid")
